@@ -1,0 +1,68 @@
+DLR1> enable
+Password:
+DLR1#
+
+DLR1# configure terminal
+Enter configuration commands, one per line. End with CNTL/Z.
+DLR1(config)#
+
+! 1) Loopback1 - IPv4 only
+DLR1(config)# interface Loopback1
+DLR1(config-if)# ip address 1.1.1.1 255.255.255.255
+DLR1(config-if)# exit
+DLR1(config)#
+
+! 2) FastEthernet0/0 - LAN (192.168.1.0/24, 2001:1::/64)
+DLR1(config)# interface FastEthernet0/0
+DLR1(config-if)# description === LAN toward PCs ===
+DLR1(config-if)# ip address 192.168.1.1 255.255.255.0
+DLR1(config-if)# ip helper-address 192.168.2.2
+DLR1(config-if)# ipv6 address 2001:1::1/64
+DLR1(config-if)# ipv6 nd other-config-flag
+DLR1(config-if)# ipv6 rip RIPNG enable
+DLR1(config-if)# no shutdown
+DLR1(config-if)# exit
+DLR1(config)#
+
+! 3) FastEthernet0/1 - spoj s NAT
+DLR1(config)# interface FastEthernet0/1
+DLR1(config-if)# description === Link to NAT ===
+DLR1(config-if)# ip address 192.168.2.1 255.255.255.0
+DLR1(config-if)# ip rip authentication mode md5
+DLR1(config-if)# ip rip authentication key-chain RIPV2_KEYS
+DLR1(config-if)# ipv6 address 2001:2::1/64
+DLR1(config-if)# ipv6 rip RIPNG enable
+DLR1(config-if)# no shutdown
+DLR1(config-if)# exit
+DLR1(config)#
+
+! 4) Key chain pre MD5 autentifikáciu RIPv2
+DLR1(config)# key chain RIPV2_KEYS
+DLR1(config-keychain)# key 1
+DLR1(config-keychain-key)# key-string HESLISKO
+DLR1(config-keychain-key)# exit
+DLR1(config-keychain)# exit
+DLR1(config)#
+
+! 5) RIPv2
+DLR1(config)# router rip
+DLR1(config-router)# version 2
+DLR1(config-router)# no auto-summary
+DLR1(config-router)# network 1.0.0.0
+DLR1(config-router)# network 192.168.1.0
+DLR1(config-router)# network 192.168.2.0
+DLR1(config-router)# exit
+DLR1(config)#
+
+! 6) RIPng
+DLR1(config)# ipv6 router rip RIPNG
+DLR1(config-ripng)# redistribute connected
+DLR1(config-ripng)# exit
+DLR1(config)#
+
+! Ukončenie a uloženie
+DLR1(config)# end
+DLR1# write memory
+Building configuration...
+[OK]
+DLR1#
