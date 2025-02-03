@@ -1,0 +1,103 @@
+[Na routeri NAT:]
+Router> enable
+Password:
+Router# hostname NAT
+NAT#
+
+! Prejdeme do config módu
+NAT# configure terminal
+Enter configuration commands, one per line. End with CNTL/Z.
+NAT(config)#
+
+! 1) Loopback1 - IPv6 only
+NAT(config)# interface Loopback1
+NAT(config-if)# ipv6 address 2001:3::1/64
+NAT(config-if)# ipv6 rip RIPNG enable
+NAT(config-if)# no shutdown
+NAT(config-if)# exit
+NAT(config)#
+
+! 2) Fa0/0 - WAN (DHCP client)
+NAT(config)# interface FastEthernet0/0
+NAT(config-if)# description === WAN to ISP ===
+NAT(config-if)# ip address dhcp
+NAT(config-if)# ip nat outside
+NAT(config-if)# no shutdown
+NAT(config-if)# exit
+NAT(config)#
+
+! 3) Fa0/1 - inside k DLR1
+NAT(config)# interface FastEthernet0/1
+NAT(config-if)# description === Inside link to DLR1 ===
+NAT(config-if)# ip address 192.168.2.2 255.255.255.0
+NAT(config-if)# ip nat inside
+NAT(config-if)# ip rip authentication mode md5
+NAT(config-if)# ip rip authentication key-chain RIPV2_KEYS
+NAT(config-if)# ipv6 address 2001:2::2/64
+NAT(config-if)# ipv6 rip RIPNG enable
+NAT(config-if)# no shutdown
+NAT(config-if)# exit
+NAT(config)#
+
+! 4) Key chain pre RIPv2 MD5
+NAT(config)# key chain RIPV2_KEYS
+NAT(config-keychain)# key 1
+NAT(config-keychain-key)# key-string HESLISKO
+NAT(config-keychain-key)# exit
+NAT(config-keychain)# exit
+NAT(config)#
+
+! 5) RIPv2
+NAT(config)# router rip
+NAT(config-router)# version 2
+NAT(config-router)# no auto-summary
+NAT(config-router)# network 192.168.2.0
+NAT(config-router)# passive-interface FastEthernet0/0
+NAT(config-router)# exit
+NAT(config)#
+
+! 6) RIPng
+NAT(config)# ipv6 router rip RIPNG
+NAT(config-ripng)# redistribute connected
+NAT(config-ripng)# exit
+NAT(config)#
+
+! 7) NAT Overload (PAT)
+NAT(config)# access-list 1 permit 192.168.1.0 0.0.0.255
+NAT(config)# access-list 1 permit 192.168.2.0 0.0.0.255
+
+NAT(config)# ip nat inside source list 1 interface FastEthernet0/0 overload
+
+! Static PAT: port 3333 -> DLR1:22
+NAT(config)# ip nat inside source static tcp 192.168.2.1 22 <PUBLIC_IP> 3333 extendable
+
+! 8) DHCPv4 (pool pre LAN 192.168.1.x)
+NAT(config)# ip dhcp excluded-address 192.168.1.1 192.168.1.50
+
+NAT(config)# ip dhcp pool LAN_V4
+NAT(dhcp-config)# network 192.168.1.0 255.255.255.0
+NAT(dhcp-config)# default-router 192.168.1.1
+NAT(dhcp-config)# dns-server 8.8.8.8
+NAT(dhcp-config)# lease 7
+NAT(dhcp-config)# exit
+NAT(config)#
+
+! 9) DHCPv6 (stateless) - prideľovanie DNS
+NAT(config)# ipv6 dhcp pool LAN_V6
+NAT(config-dhcpv6)# dns-server 2001:4860:4860::8888
+NAT(config-dhcpv6)# domain-name lan.local
+NAT(config-dhcpv6)# exit
+NAT(config)#
+
+! Zapnutie DHCPv6 server na vnútri (Fa0/1)
+NAT(config)# interface FastEthernet0/1
+NAT(config-if)# ipv6 dhcp server LAN_V6
+NAT(config-if)# exit
+NAT(config)#
+
+! Ukončenie a uloženie
+NAT(config)# end
+NAT# write memory
+Building configuration...
+[OK]
+NAT#
