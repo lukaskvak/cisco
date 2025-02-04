@@ -1,0 +1,7 @@
+DLS1# configure terminal
+DLS1(config)# ip domain-name fri.uniza.sk
+DLS1(config)# crypto key generate rsa
+% Specify the modulus length (512 to 4096):
+2048
+! Nastav SSH verziu 2
+DLS1(config)# ip ssh version 2
