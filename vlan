@@ -13,3 +13,11 @@ DLS1(config-vlan)# exit
 DLS1(config)# vlan 999
 DLS1(config-vlan)# name NATIVE
 DLS1(config-vlan)# exit
+
+DLS1(config)# interface vlan 99
+DLS1(config-if)# ip address 192.168.99.1 255.255.255.0
+DLS1(config-if)# no shutdown
+DLS1(config-if)# exit
+
+! Default gateway (napr. ak je router .254)
+DLS1(config)# ip default-gateway 192.168.99.254
