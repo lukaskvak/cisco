@@ -1,0 +1,29 @@
+Switch> enable
+Switch# configure terminal
+
+! Nastavíme názov a vypneme DNS lookup
+Switch(config)# hostname DLS1
+DLS1(config)# no ip domain-lookup
+
+! Vytvoríme lokálnych používateľov
+DLS1(config)# username admin privilege 15 secret admin
+DLS1(config)# username student privilege 0 secret student
+
+! Povolenie šifrovania hesiel
+DLS1(config)# service password-encryption
+
+! Nastavenie enable hesla
+DLS1(config)# enable secret class
+
+! Nastavenie liniek
+DLS1(config)# line console 0
+DLS1(config-line)# logging synchronous
+DLS1(config-line)# login local
+DLS1(config-line)# exit
+
+DLS1(config)# line vty 0 4
+DLS1(config-line)# logging synchronous
+DLS1(config-line)# login local
+! Povolenie SSH a Telnet
+DLS1(config-line)# transport input telnet ssh
+DLS1(config-line)# end
