@@ -1,0 +1,5 @@
+DLS1(config)# vtp mode server
+DLS1(config)# vtp domain kis.fri
+DLS1(config)# vtp password tazke_heslo
+! Pre Rapid PVST+ je obvykle vtp version 2 alebo 3
+DLS1(config)# vtp version 2
