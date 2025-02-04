@@ -1,0 +1,15 @@
+DLS1(config)# vlan 10
+DLS1(config-vlan)# name STUDENT
+DLS1(config-vlan)# exit
+
+DLS1(config)# vlan 20
+DLS1(config-vlan)# name UCITEL
+DLS1(config-vlan)# exit
+
+DLS1(config)# vlan 99
+DLS1(config-vlan)# name MANAGEMENT
+DLS1(config-vlan)# exit
+
+DLS1(config)# vlan 999
+DLS1(config-vlan)# name NATIVE
+DLS1(config-vlan)# exit
